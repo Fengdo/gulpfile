@@ -16,13 +16,15 @@ const config = {
 		js:src+"/js/",
 		img:src+"/img/",
 		sass:src+"/sass/",
-		less:src+"/less/"
+		less:src+"/less/",
+		support:src+"/support/"
 	},
 	dist:{
 		root:dist,
 		css:dist+"/css/",
 		js:dist+"/js/",
 		img:dist+"/img/",
+		support:dist+"/support/"
 	}
 }
 

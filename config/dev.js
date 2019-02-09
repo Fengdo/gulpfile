@@ -15,9 +15,9 @@ function project(cd) {
 // 创建项目
 function create(cd) {
 	if(config.type=="sass") {
-		var dirs = [config.src.root,config.src.css,config.src.sass,config.src.js,config.src.img];
+		var dirs = [config.src.root,config.src.css,config.src.sass,config.src.js,config.src.img,config.src.support];
 	}else{
-		var dirs = [config.src.root,config.src.css,config.src.less,config.src.js,config.src.img];
+		var dirs = [config.src.root,config.src.css,config.src.less,config.src.js,config.src.img,config.src.support];
 	}
 	dirs.forEach(dir => {
 	    $.mkdirp.sync(dir);
@@ -49,11 +49,29 @@ function write_index(cd) {
 }
 
 function write_scss(cd) {
-	if(config.type=="sass"){
-		var file = config.src.sass+"style.scss";
+	if(config.type == "sass"){
+		var files = [config.src.sass+"style.scss",config.src.sass+"_config.scss"];
 	}else{
-		var file = config.src.less+"style.less";
+		var files = [config.src.less+"style.less",config.src.less+"config.less"];
 	}
+	var msg = "";
+	files.forEach(function(item){
+		if(item == config.src.sass+"style.scss"){
+			msg = "@import 'config.scss';";
+		}else if(item == config.src.less+"style.less"){
+			msg = "@import 'config.less';";
+		}else{
+			msg = "";
+		}
+		$.fs.writeFile(item,msg,function(err){
+			if(err) return console.log(err);
+		});
+	});
+	cd();
+}
+
+function write_js(cd) {
+	var file = config.src.js+"main.js";
 	$.fs.writeFile(file,"",function(err){
 		if(err) return console.log(err);
 	})
@@ -82,8 +100,7 @@ function server(cd) {
 			index:config.now
 		}
 	})
-
-	watch(config.src.root+"/*.html").on('change',$.browserSync.reload);
+	watch([config.src.root+"/*.html",config.src.js+"*.js"]).on('change',$.browserSync.reload);
 	watch([config.src.sass+"*.scss",config.src.less+"*.less"],generate).on('change',$.browserSync.reload);
 	cd();
 }
@@ -91,6 +108,6 @@ function server(cd) {
 /* 曝光dev接口 */
 exports.project = project; 					// 项目信息
 exports.create = series(clean_src,
-create,parallel(write_index,write_scss)); 	// 创建项目
+create,parallel(write_index,write_scss,write_js)); 	// 创建项目
 exports.clean = clean; 						// 删除项目
 exports.server = server; 					// 本地服务器
